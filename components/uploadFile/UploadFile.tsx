@@ -1,5 +1,4 @@
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { ethers } from "ethers";
 
 export default function UploadFile() {
@@ -7,8 +6,7 @@ export default function UploadFile() {
   const [hash, setHash] = useState<string | null>(null);
 
   // Function to handle file upload and generate the hash
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0] || null;
+  const handleFileChange = async (selectedFile: File | null) => {
     setFile(selectedFile);
 
     if (selectedFile) {
@@ -24,8 +22,20 @@ export default function UploadFile() {
     }
   };
 
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const droppedFile = e.dataTransfer.files[0];
+    handleFileChange(droppedFile);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+  };
+
   return (
     <div
+      onDrop={handleDrop}
+      onDragOver={handleDragOver}
       className="bg-gray-50 text-center px-4 rounded w-72 h-80 flex flex-col items-center justify-center cursor-pointer border-2 border-gray-400 border-dashed font-[sans-serif]"
     >
       <div className="py-6">
@@ -47,7 +57,7 @@ export default function UploadFile() {
           type="file"
           id="uploadFile1"
           className="hidden"
-          onChange={handleFileChange}
+          onChange={(e) => handleFileChange(e.target.files?.[0] || null)}
         />
         <label
           htmlFor="uploadFile1"
