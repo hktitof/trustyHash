@@ -1,28 +1,85 @@
-export default function StatisticsTable({ statistics }) {
-    return (
-      <section className="bg-white dark:bg-gray-900 shadow-md rounded-md p-6">
-        <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Statistics</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left table-auto">
-            <thead>
-              <tr className="bg-gray-200 dark:bg-gray-700">
-                <th className="px-4 py-2 text-gray-800 dark:text-white">Statistic</th>
-                <th className="px-4 py-2 text-gray-800 dark:text-white">Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="border-b border-gray-200 dark:border-gray-600">
-                <td className="px-4 py-2 text-gray-800 dark:text-white">Total Proofs</td>
-                <td className="px-4 py-2 text-gray-800 dark:text-white">{statistics.totalProofs}</td>
-              </tr>
-              <tr className="border-b border-gray-200 dark:border-gray-600">
-                <td className="px-4 py-2 text-gray-800 dark:text-white">Successful Verifications</td>
-                <td className="px-4 py-2 text-gray-800 dark:text-white">{statistics.successfulVerifications}</td>
-              </tr>
-              {/* Add more rows for additional statistics */}
-            </tbody>
-          </table>
+export default function StatisticsTable({}) {
+  return (
+    <>
+      <div className="flex  items-center justify-center  ">
+        <div className="flex items-center justify-center ">
+          <div className="overflow-x-auto relative shadow-md sm:rounded-lg">
+            <div className="overflow-x-auto relative shadow-md sm:rounded-lg">
+              <table className="w-full text-sm text-left text-gray-500 ">
+                <thead className="text-xs text-gray-700 uppercase bg-gray-50  dark:text-gray-400">
+                  <tr>
+                    <th scope="col" className="py-3 px-6">
+                      Asset ID
+                    </th>
+                    <th scope="col" className="py-3 px-6">
+                      Owner Address
+                    </th>
+                    <th scope="col" className="py-3 px-6">
+                      Hash Value
+                    </th>
+                    <th scope="col" className="py-3 px-6">
+                      TimeStamp
+                    </th>
+                    <th scope="col" className="py-3 px-6">
+                      Owner Note
+                    </th>
+                    
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="bg-white border-b">
+                    <td className="py-4 px-6">12345</td>
+                    <td className="py-4 px-6">0xAbCd1234EfGh5678</td>
+                    <td className="py-4 px-6">a94a8fe5ccb19ba61c4c0873d391e987982fbbd3</td>
+                    <td className="py-4 px-6">2024-08-10 12:34 PM</td>
+                    
+                    <td className="py-4 px-6">Asset verified successfully.</td>
+                  </tr>
+
+                  <tr className="bg-gray-50 border-b">
+                    <td className="py-4 px-6">67890</td>
+                    <td className="py-4 px-6">0xEfGh5678IjKl9101</td>
+                    <td className="py-4 px-6">74e6f7298a9c2d168935f58c001bad88f5f5fd85</td>
+                    <td className="py-4 px-6">2024-08-10 12:40 PM</td>
+                    <td className="py-4 px-6">Verification in process.</td>
+                  </tr>
+
+                  <tr className="bg-white border-b">
+                    <td className="py-4 px-6">54321</td>
+                    <td className="py-4 px-6">0xIjKl4321MnOp2345</td>
+                    <td className="py-4 px-6">26ab0db90d72e28ad0ba1e22ee510510d0d4a3c5</td>
+                    <td className="py-4 px-6">2024-08-10 12:50 PM</td>
+                    <td className="py-4 px-6">Hash mismatch detected.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-      </section>
-    );
-  }
+      </div>
+
+      <div className="text-sm text-white font-semibold py-10 text-center -mt-20">
+        Made with{" "}
+        <a
+          href="https://chat.openai.com/g/g-8gGyAPc6i-material-tailwind-gpt"
+          className="text-white hover:text-gray-800"
+          target="_blank"
+          rel="noreferrer"
+        >
+          MT GPT
+        </a>
+        based on
+        <a
+          href="https://www.material-tailwind.com"
+          className="text-blueGray-500 hover:text-blueGray-800"
+          target="_blank"
+          rel="noreferrer"
+        >
+          {" "}
+          Material Tailwind Framework
+        </a>
+        .
+      </div>
+    </>
+  );
+}

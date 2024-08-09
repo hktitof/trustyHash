@@ -5,10 +5,7 @@ import { useState, useEffect } from "react";
 // Components
 import Header from "../Header/Header";
 import Menu from "../menu/Menu";
-import UploadSection from "../uploadSection/UploadSection";
-import VerificationSection from "../verificationSection/VerificationSection";
 import StatisticsTable from "../statisticsTable/StatisticsTable";
-import Footer from "../footer/Footer";
 
 // Smart Contract ABI and Address
 // import contractABI from '../abi/TrustyHash.json';
@@ -28,6 +25,7 @@ export default function Home() {
     <div className="bg-gray-100  min-h-screen">
       <Menu />
       <Header />
+      <StatisticsTable />
       <div className="container mx-auto py-10 px-4">
         {/* <UploadSection contract={contract} />
         <VerificationSection contract={contract} />
