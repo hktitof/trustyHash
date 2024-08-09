@@ -12,10 +12,14 @@
     "node-fetch": "^2.6.7"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.51.23",
+    "@web3modal/wagmi": "^5.0.11",
     "next": "12.3.4",
     "punycode": "^2.3.1",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "viem": "^2.19.3",
+    "wagmi": "^2.12.5"
   },
   "devDependencies": {
     "@babel/core": "^7.17.10",

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useWeb3Modal } from "@web3modal/wagmi/react";
 
 const Menu = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -8,6 +9,8 @@ const Menu = () => {
     document.body.classList.toggle("dark");
   };
 
+  const { open } = useWeb3Modal();
+
   return (
     <header className="bg-white shadow-md">
       <div className="container mx-auto flex justify-between items-center py-4 px-4">
@@ -15,10 +18,13 @@ const Menu = () => {
           <img src="/logo.svg" alt="TrustyHash" className="h-8" />
         </div>
         <div className="flex items-center space-x-4">
-          
-          <button className="bg-black hover:bg-blue-600 text-white font-bold py-4 px-7 rounded-3xl transition-colors">
+          <button
+            onClick={() => open()}
+            className="bg-black hover:bg-blue-600 text-white font-bold py-4 px-7 rounded-3xl transition-colors"
+          >
             Connect
-          </button><button onClick={toggleDarkMode} className="bg-gray-200 rounded-full p-2 hover:bg-gray-300 transition-colors">
+          </button>
+          <button onClick={toggleDarkMode} className="bg-gray-200 rounded-full p-2 hover:bg-gray-300 transition-colors">
             {isDarkMode ? (
               <svg
                 className="h-6 w-6 text-white"
