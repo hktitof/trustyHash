@@ -11,6 +11,17 @@ import StatisticsTable from "../statisticsTable/StatisticsTable";
 // import contractABI from '../abi/TrustyHash.json';
 const contractAddress = "0x1234567890123456789012345678901234567890";
 
+import { Account } from "../Account/Account";
+import { WalletOptions } from "../WalletOptions/WalletOptions";
+
+import { useAccount } from "wagmi";
+
+function ConnectWallet() {
+  const { isConnected } = useAccount();
+  if (isConnected) return <Account />;
+  return <WalletOptions />;
+}
+
 export default function Home() {
   const [walletConnected, setWalletConnected] = useState(false);
   const [provider, setProvider] = useState(null);
@@ -23,6 +34,9 @@ export default function Home() {
 
   return (
     <div className="bg-gray-100  min-h-screen">
+      {/* <div className="w-full h-24">
+        <ConnectWallet />
+      </div> */}
       <Menu />
       <Header />
       <StatisticsTable />

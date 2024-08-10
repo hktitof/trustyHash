@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ethers } from "ethers";
+import UploadHashButton from "../uploadHashButton/UploadHashButton";
 
 export default function UploadFile() {
   const [file, setFile] = useState<File | null>(null);
@@ -46,9 +47,7 @@ export default function UploadFile() {
           </svg>
           <h4 className="text-base font-semibold text-gray-600">Drag and drop files here</h4>
         </div>
-
         <hr className="w-full border-gray-400 my-2" />
-
         <div className="py-6">
           <input
             type="file"
@@ -64,12 +63,13 @@ export default function UploadFile() {
           </label>
           <p className="text-xs text-gray-400 mt-4">PNG, JPG, SVG, WEBP, and GIF are Allowed.</p>
         </div>
-
         <div className="w-full">
           <p className="text-xs text-gray-400">Selected file: {file?.name || "None"}</p>
           {hash && <p className="text-xs text-gray-400">File Hash: {hash}</p>}
         </div>
+        {/* //? add a button to upload the file to the blockchain */}
       </div>
+      <UploadHashButton />
     </div>
   );
 }

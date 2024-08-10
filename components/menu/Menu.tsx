@@ -1,15 +1,26 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import ConnectWalletButton from "../connectWalletButton/ConnectWalletButton";
+
 const Menu = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  const { open } = useWeb3Modal();
+
+  // Use useEffect to ensure code runs only on the client side
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
     document.body.classList.toggle("dark");
   };
 
-  const { open } = useWeb3Modal();
+  if (!isClient) {
+    return null; // Ensure the component only renders on the client
+  }
 
   return (
     <header className="bg-white shadow-md">
@@ -19,7 +30,11 @@ const Menu = () => {
         </div>
         <div className="flex items-center space-x-4">
           <ConnectWalletButton />
-          <button onClick={toggleDarkMode} className="bg-gray-200 rounded-full p-2 hover:bg-gray-300 transition-colors">
+
+          <button
+            onClick={toggleDarkMode}
+            className="bg-gray-200 rounded-full p-2 hover:bg-gray-300 transition-colors"
+          >
             {isDarkMode ? (
               <svg
                 className="h-6 w-6 text-white"

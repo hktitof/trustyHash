@@ -1,14 +1,17 @@
 import "../styles/globals.css";
 import "tailwindcss/tailwind.css";
 import Web3ModalProvider from "../components/Web3ModalProvider/Web3ModalProvider";
-
 import { IncomingHttpHeaders } from "http";
 
 import { cookieToInitialState } from "wagmi";
 
-import { config } from "../config";
+// 1. Import modules
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { WagmiProvider, useAccount } from "wagmi";
+import { config } from "../config/config";
 
-
+// 2. Set up a React Query client.
+const queryClient = new QueryClient();
 
 function MyApp({ Component, pageProps }) {
   const headers: IncomingHttpHeaders = {};
@@ -16,7 +19,11 @@ function MyApp({ Component, pageProps }) {
 
   return (
     <Web3ModalProvider initialState={initialState}>
-      <Component {...pageProps} />
+      <WagmiProvider config={config}>
+        <QueryClientProvider client={queryClient}>
+          <Component {...pageProps} />
+        </QueryClientProvider>
+      </WagmiProvider>
     </Web3ModalProvider>
   );
 }

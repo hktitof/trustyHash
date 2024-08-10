@@ -1,5 +1,5 @@
-// contract address 
-export const contactaAddress = "0x7d6A2D9C614224A734bb0d06671B8ea13a95B935";
+// contract address
+export const contractAddress = "0x7d6A2D9C614224A734bb0d06671B8ea13a95B935";
 
 export const abi = [
   { inputs: [], name: "HashAlreadyExists", type: "error" },

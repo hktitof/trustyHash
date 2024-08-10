@@ -10,6 +10,9 @@ export default function ConnectWalletButton() {
   // print isConnected
   console.log(isConnected);
 
+  if (typeof window === "undefined") {
+    return <></>;
+  }
   if (isConnected) {
     return (
       <button
