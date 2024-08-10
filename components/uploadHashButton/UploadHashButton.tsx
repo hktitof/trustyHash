@@ -30,6 +30,8 @@ export default function UploadHashButton() {
     return null; // Ensure the component only renders on the client
   }
 
+  // print result
+  console.log("Result : ", result);
 
   return (
     <div className="w-full flex justify-center">
