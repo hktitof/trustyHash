@@ -1,4 +1,104 @@
+import { useReadContract } from "wagmi";
+import { config } from "../../config/config";
+import { abi, contractAddress } from "../../config/contract";
+import { useEffect, useState } from "react";
+
+type Hash = [
+  {
+    hash: string;
+    hashData: {
+      note: string;
+      dateStored: bigint;
+      storedBy: string;
+    };
+  }
+];
 export default function StatisticsTable({}) {
+  // declare totalHashes state
+  const [totalHashes, setTotalHashes] = useState<Number | null>(null);
+
+  // declare hashes state
+  const [hashes, setHashes] = useState<Hash | null>(null);
+
+  const { data } = useReadContract({
+    config,
+    abi,
+    address: contractAddress,
+    functionName: "totalHashes",
+    args: [],
+  });
+
+  useEffect(() => {
+    if (data) {
+      // convert data BigNumber to Number
+      const dataToString = data.toString();
+
+      // convert dataToString to Number
+      const dataToNumber = Number(dataToString);
+
+      // set totalHashes state
+      setTotalHashes(dataToNumber);
+    }
+  }, [data]);
+
+  // call the function getLastHashesWithData
+  const result = useReadContract({
+    config,
+    abi,
+    address: contractAddress,
+    functionName: "getLastHashesWithData",
+    args: [data],
+  });
+
+  useEffect(() => {
+    if (result.data) {
+      // set hashes state
+      setHashes(result.data as Hash);
+    }
+  }, [result.data]);
+
+  // convert bigInt timestamp to date
+  const convertTimestampToDate = (timestamp: bigint) => {
+    const date = new Date(Number(timestamp) * 1000).toLocaleString();
+    // convert date to readable format
+
+    return date;
+  };
+
+  // convert bytes to string, like "0x5465737420310000000000" to "Test 1"
+  function hexToString(hex) {
+    // Remove the '0x' prefix if it exists
+    if (hex.startsWith("0x")) {
+      hex = hex.slice(2);
+    }
+
+    let str = "";
+    for (let i = 0; i < hex.length; i += 2) {
+      const byte = hex.slice(i, i + 2);
+      // Convert each byte to a character
+      const char = String.fromCharCode(parseInt(byte, 16));
+      // Break if null byte is encountered (if needed)
+      if (char === "\0") break;
+      str += char;
+    }
+    return str;
+  }
+
+  // function to short the hash string text and add "..." in between
+  function shortHashString(hash: string) {
+    return hash.slice(0, 6) + "..." + hash.slice(hash.length - 6);
+  }
+
+  // function to short the owner address string text and add "..." in between
+  function shortOwnerAddressString(owner: string) {
+    return owner.slice(0, 6) + "..." + owner.slice(owner.length - 6);
+  }
+
+  // print result
+  console.log("Result : ", totalHashes);
+
+  // print result
+  console.log("Result : ", hashes);
   return (
     <>
       <div className="flex  items-center justify-center  ">
@@ -18,39 +118,47 @@ export default function StatisticsTable({}) {
                       Hash Value
                     </th>
                     <th scope="col" className="py-3 px-6">
-                      TimeStamp
+                      Time
                     </th>
                     <th scope="col" className="py-3 px-6">
                       Owner Note
                     </th>
-                    
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="bg-white border-b">
-                    <td className="py-4 px-6">12345</td>
-                    <td className="py-4 px-6">0xAbCd1234EfGh5678</td>
-                    <td className="py-4 px-6">a94a8fe5ccb19ba61c4c0873d391e987982fbbd3</td>
-                    <td className="py-4 px-6">2024-08-10 12:34 PM</td>
-                    
-                    <td className="py-4 px-6">Asset verified successfully.</td>
-                  </tr>
-
-                  <tr className="bg-gray-50 border-b">
-                    <td className="py-4 px-6">67890</td>
-                    <td className="py-4 px-6">0xEfGh5678IjKl9101</td>
-                    <td className="py-4 px-6">74e6f7298a9c2d168935f58c001bad88f5f5fd85</td>
-                    <td className="py-4 px-6">2024-08-10 12:40 PM</td>
-                    <td className="py-4 px-6">Verification in process.</td>
-                  </tr>
-
-                  <tr className="bg-white border-b">
-                    <td className="py-4 px-6">54321</td>
-                    <td className="py-4 px-6">0xIjKl4321MnOp2345</td>
-                    <td className="py-4 px-6">26ab0db90d72e28ad0ba1e22ee510510d0d4a3c5</td>
-                    <td className="py-4 px-6">2024-08-10 12:50 PM</td>
-                    <td className="py-4 px-6">Hash mismatch detected.</td>
-                  </tr>
+                  {/* loop over hashes and display the data */}
+                  {hashes?.map((hash, index) => {
+                    return (
+                      <tr key={index} className={index % 2 === 0 ? "bg-white border-b" : "bg-gray-50 border-b"}>
+                        <td className="py-4 px-6">{index + 1}</td>
+                        <td className="py-4 px-6">{shortOwnerAddressString(hash.hashData.storedBy)}</td>
+                        <td className="py-4 px-6">{shortHashString(hash.hash)}</td>
+                        <td className="py-4 px-6">{convertTimestampToDate(hash.hashData.dateStored)}</td>
+                        <td className="py-4 px-6">{hexToString(hash.hashData.note)}</td>
+                      </tr>
+                    );
+                  })}
+                  {/* add a loading skeleton that with bouncing up and down when reading from smart contract*/}
+                  {hashes == null &&
+                    Array.from({ length: 3 }).map((_, index) => (
+                      <tr key={index}>
+                        <td className="py-1 pl-[24px] bg-white">
+                          <div className="h-4 bg-gray-100 rounded animate-pulse w-3"></div>
+                        </td>
+                        <td className="py-4 px-6 bg-white">
+                          <div className="h-4 bg-gray-200 rounded animate-pulse w-28"></div>
+                        </td>
+                        <td className="py-4 px-6 bg-white">
+                          <div className="h-4 bg-gray-200 rounded animate-pulse w-28"></div>
+                        </td>
+                        <td className="py-4 px-6 bg-white">
+                          <div className="h-4 bg-gray-200 rounded animate-pulse w-38"></div>
+                        </td>
+                        <td className="py-4 px-6 bg-white">
+                          <div className="h-4 bg-gray-200 rounded animate-pulse w-40"></div>
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>

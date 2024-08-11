@@ -17,7 +17,7 @@ export default function UploadHashButton() {
     config,
   });
   const { writeContract } = result;
-  const hash = "0x935c3a5341f4b649158f3da138d5dc8f6033bd7166d7603d9d2efc40ac3b3877";
+  const hash = "0x2b0b912f6794ecf10c0206490d112cc3c64a8625326a5dc0777ece72af1304ab";
   const note = ethers.encodeBytes32String("Test 1");
 
   // slice the note to 24 bytes
