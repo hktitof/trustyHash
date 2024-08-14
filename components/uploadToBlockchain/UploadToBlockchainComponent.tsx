@@ -4,14 +4,22 @@ import { useAccount, useWriteContract } from "wagmi";
 import { config } from "../../config/config";
 import { abi, contractAddress } from "../../config/contract";
 
-const UploadToBlockchainComponent = ({ fileName, fileHash, onUpload, setReset, fileSize }) => {
+const UploadToBlockchainComponent = ({
+  fileName,
+  fileHash,
+  onUpload,
+  setReset,
+  fileSize,
+  toast,
+  setIsFileUploadingToBlockchain,
+  setUploadFileResult,
+}) => {
   const [note, setNote] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const result = useWriteContract({
     config,
   });
   const { writeContract } = result;
-  const hash = "0x2b0b912f6794ecf10c0206490d112cc3c64a8625326a5dc0777ece72af1304ab";
 
   const { address } = useAccount();
   const [isClient, setIsClient] = useState(false);
@@ -26,10 +34,38 @@ const UploadToBlockchainComponent = ({ fileName, fileHash, onUpload, setReset, f
   const handleUpload = async () => {
     setIsUploading(true);
     try {
-      await onUpload({ fileName, fileHash, note });
+      //   await onUpload({ fileName, fileHash, note });
+      console.log("clicked Upload to Blockchain button !!");
+      // print note length
+      console.log("Note length:", note.length);
+
+      const noteBytes = ethers.encodeBytes32String(note);
+
+      // print note bytes
+      console.log("Note bytes:", noteBytes);
+
+      // fix note bytes to 25 bytes only count from left to the right
+      const noteBytesFixed = noteBytes.slice(0, 24);
+      setIsFileUploadingToBlockchain(true);
+      const result = writeContract({
+        abi,
+        address: contractAddress,
+        functionName: "storeHash",
+        args: [fileHash, noteBytesFixed],
+        chain: undefined,
+        account: address,
+      });
+      setUploadFileResult(result);
+      //
+      // print result
+      console.log("Result when submitting : ", result);
+      console.log("Finished clicking !!");
       // Handle successful upload (e.g., show success message, reset form, etc.)
     } catch (error) {
-      console.error("Upload failed:", error);
+      // printing error on console
+      console.error("Error while uploading to blockchain", error);
+      toast.error(error.message);
+      setIsFileUploadingToBlockchain(false);
       // Handle error (e.g., show error message)
     } finally {
       setIsUploading(false);
@@ -108,28 +144,7 @@ const UploadToBlockchainComponent = ({ fileName, fileHash, onUpload, setReset, f
 
       <button
         onClick={async () => {
-          console.log("clicked !!");
-          // print note length
-          console.log("Note length:", note.length);
-
-          const noteBytes = ethers.encodeBytes32String(note);
-
-          // print note bytes
-          console.log("Note bytes:", noteBytes);
-
-          // fix note bytes to 25 bytes only count from left to the right
-          const noteBytesFixed = noteBytes.slice(0, 24);
-          const result = writeContract({
-            abi,
-            address: contractAddress,
-            functionName: "storeHash",
-            args: [hash, noteBytesFixed],
-            chain: undefined,
-            account: address,
-          });
-          // print result
-          console.log("Result when submitting : ", result);
-          console.log("Finished clicking !!");
+          await handleUpload();
         }}
         disabled={isUploading}
         className={`w-full ${

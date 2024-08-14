@@ -2,10 +2,17 @@ import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import UploadHashButton from "../uploadHashButton/UploadHashButton";
 import UploadToBlockchainComponent from "../uploadToBlockchain/UploadToBlockchainComponent";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { abi, contractAddress } from "../../config/contract";
 
 import { concat, keccak256, getBytes } from "ethers";
 import WaitingFileHashing from "../waitingFileHashing/WaitingFileHashing";
 import UploadProgressTracker from "../uploadProgressTracker/UploadProgressTracker";
+import { readContract } from "viem/actions";
+import { useAccount, useReadContract } from "wagmi";
+import { config } from "../../config/config";
+
 // import arrayify
 
 export default function UploadFile() {
@@ -23,7 +30,12 @@ export default function UploadFile() {
   const [reset, setReset] = useState(false);
 
   // create is file uploading state
-  const [isFileUploading, setIsFileUploading] = useState(false);
+  const [isFileUploadingToBlockchain, setIsFileUploadingToBlockchain] = useState(false);
+
+  const { address } = useAccount();
+
+  // create uploadFileResult state
+  const [uploadFileResult, setUploadFileResult] = useState<any>();
 
   const steps = [
     { id: 1, name: "Wallet Approval", description: "Waiting for wallet approval" },
@@ -33,6 +45,17 @@ export default function UploadFile() {
   ];
 
   const [currentStep, setCurrentStep] = useState(1);
+
+  const { data } = useReadContract({
+    config,
+    abi,
+    address: contractAddress,
+    functionName: "verifyHash",
+    args: [hash],
+  });
+
+  // print the data
+  console.log("data : ", data);
 
   // create a useEffect that will reset all the states if the reset state is true
   useEffect(() => {
@@ -46,12 +69,19 @@ export default function UploadFile() {
     }
   }, [reset]);
 
-  // set isFileHashed to true when hash is generated
+  // set isFileHashed to true when hash is generated, and check if the hash already exist in the blockchain
   useEffect(() => {
     if (hash) {
+      // check if the hash already exist
+      if (data) {
+        // print the data
+        console.log("checking if has exist data : ", data);
+        // show toast that the hash already exist
+        toast.error("The hash already exist");
+      }
       setIsFileHashed(true);
     }
-  }, [hash]);
+  }, [data, hash]);
 
   const handleFileChange = async (selectedFile: File | null) => {
     setFile(selectedFile);
@@ -123,7 +153,6 @@ export default function UploadFile() {
     e.preventDefault();
   };
 
-
   return (
     <div>
       <div
@@ -133,19 +162,47 @@ export default function UploadFile() {
           !isFileHashed ? "cursor-pointer" : ""
         } border-2 border-gray-400 border-dashed font-[sans-serif]`}
       >
+        <ToastContainer
+          position="top-center"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
 
-        {isFileHashed && (
+        {isFileHashed && !isFileUploadingToBlockchain && (
           <UploadToBlockchainComponent
+            setUploadFileResult={setUploadFileResult}
             fileName={file.name}
             fileSize={fileSize}
             fileHash={hash}
             onUpload={undefined}
             setReset={setReset}
+            toast={toast}
+            setIsFileUploadingToBlockchain={setIsFileUploadingToBlockchain}
           />
         )}
-        {isFileUploading && <UploadProgressTracker currentStep={currentStep} />}
-        {isFileHashing && !isFileUploading && <WaitingFileHashing progress={progress} />}
-        {!isFileHashing && !isFileUploading && !isFileHashed && (
+        {isFileUploadingToBlockchain && (
+          <UploadProgressTracker
+            currentStep={currentStep}
+            uploadFileResult={uploadFileResult}
+            toast={toast}
+            abi={undefined}
+            contractAddress={undefined}
+            fileHash={undefined}
+            noteBytesFixed={undefined}
+            address={undefined}
+            config={undefined}
+            setIsFileUploadingToBlockchain={setIsFileUploadingToBlockchain}
+          />
+        )}
+        {isFileHashing && !isFileUploadingToBlockchain && <WaitingFileHashing progress={progress} />}
+        {!isFileHashing && !isFileUploadingToBlockchain && !isFileHashed && (
           <>
             <div className="py-6">
               <svg
@@ -177,7 +234,6 @@ export default function UploadFile() {
           </>
         )}
       </div>
-      {/* <UploadHashButton /> */}
     </div>
   );
 }

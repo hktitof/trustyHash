@@ -2,6 +2,8 @@ import "../styles/globals.css";
 import "tailwindcss/tailwind.css";
 import Web3ModalProvider from "../components/Web3ModalProvider/Web3ModalProvider";
 import { IncomingHttpHeaders } from "http";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import { cookieToInitialState } from "wagmi";
 
@@ -19,6 +21,7 @@ function MyApp({ Component, pageProps }) {
 
   return (
     <Web3ModalProvider initialState={initialState}>
+      <ToastContainer />
       <WagmiProvider config={config}>
         <QueryClientProvider client={queryClient}>
           <Component {...pageProps} />
