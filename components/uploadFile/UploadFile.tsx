@@ -10,12 +10,13 @@ import { concat, keccak256, getBytes } from "ethers";
 import WaitingFileHashing from "../waitingFileHashing/WaitingFileHashing";
 import UploadProgressTracker from "../uploadProgressTracker/UploadProgressTracker";
 import { readContract } from "viem/actions";
-import { useAccount, useReadContract } from "wagmi";
+import { useReadContract, useTransactionReceipt } from "wagmi";
 import { config } from "../../config/config";
+import { useAccount, useWriteContract } from "wagmi";
 
 // import arrayify
 
-export default function UploadFile() {
+export default function UploadFile({ hashes }) {
   const [file, setFile] = useState<File | null>(null);
   const [hash, setHash] = useState<string | null>(null);
   // state that will track is the file is selected so we can show spinner for hashing
@@ -29,8 +30,8 @@ export default function UploadFile() {
   // create a state that will reset all the states, it will be used if a user wanted to upload a different file
   const [reset, setReset] = useState(false);
 
-  // create is file uploading state
-  const [isFileUploadingToBlockchain, setIsFileUploadingToBlockchain] = useState(false);
+  // create open wallet state if the user clicked on the upload button to open the wallet
+  const [isRequestedToOpenWallet, setIRequestedToOpenWallet] = useState(false);
 
   const { address } = useAccount();
 
@@ -43,8 +44,45 @@ export default function UploadFile() {
     { id: 3, name: "Transaction Confirmation", description: "Waiting for transaction confirmation" },
     { id: 4, name: "Upload Complete", description: "Hash has been successfully submitted" },
   ];
+  const result = useWriteContract({
+    config,
+  });
+  const { data: transactionHash, writeContract } = useWriteContract();
 
   const [currentStep, setCurrentStep] = useState(1);
+
+  const { error, isLoading, isSuccess } = useTransactionReceipt({
+    hash: transactionHash,
+  });
+
+  // declare a state that will catch the transaction hash, named catchTransactionHash
+  const [catchTransactionHash, setCatchTransactionHash] = useState<string | null>(null);
+
+  // set the catchTransactionHash to the transactionHash
+  useEffect(() => {
+    if (transactionHash) setCatchTransactionHash(transactionHash);
+  }, [transactionHash]);
+
+  // set current step to 2 if the transaction hash is not null, which means it's generated
+  useEffect(() => {
+    if (transactionHash) {
+      setCurrentStep(2);
+    }
+  }, [transactionHash]);
+
+  // set current step to 3 if the transaction is success
+  useEffect(() => {
+    if (isSuccess) {
+      setCurrentStep(3);
+    }
+  }, [isSuccess, transactionHash]);
+
+  // print error using toast if it's accured
+  useEffect(() => {
+    if (error) {
+      toast.error(`Error occurred, ${error || "Please try again"}`);
+    }
+  }, [error]);
 
   const { data } = useReadContract({
     config,
@@ -54,8 +92,19 @@ export default function UploadFile() {
     args: [hash],
   });
 
-  // print the data
-  console.log("data : ", data);
+  // declare state that will determine if the hash already exist in the blockchain
+  const [isHashExist, setIsHashExist] = useState(false);
+
+  // show toast error and reset the states if the hash already exist
+  useEffect(() => {
+    if (isHashExist) {
+      toast.error("Hash already exist in the blockchain");
+      // setIsHashExist(false);
+    }
+  }, [isHashExist]);
+
+  // print the transaction hash
+  console.log("Transaction Hash: ", transactionHash);
 
   // create a useEffect that will reset all the states if the reset state is true
   useEffect(() => {
@@ -74,14 +123,28 @@ export default function UploadFile() {
     if (hash) {
       // check if the hash already exist
       if (data) {
-        // print the data
-        console.log("checking if has exist data : ", data);
         // show toast that the hash already exist
-        toast.error("The hash already exist");
+        setIsHashExist(true);
+
+        // reset the states by reversing these states (!isFileHashing && !isRequestedToOpenWallet && !isFileHashed)
+        setIsFileHashed(false);
+        setIsFileHashing(false);
+      } else {
+        setIsFileHashed(true);
       }
-      setIsFileHashed(true);
     }
   }, [data, hash]);
+
+  const resetAllStates = () => {
+    setIRequestedToOpenWallet(false);
+    setFile(null);
+    setHash(null);
+    setIsFileHashing(false);
+    setProgress(0);
+    setIsFileHashed(false);
+    setReset(false);
+    setCurrentStep(1);
+  };
 
   const handleFileChange = async (selectedFile: File | null) => {
     setFile(selectedFile);
@@ -129,6 +192,9 @@ export default function UploadFile() {
       try {
         const finalHash = keccak256(concatenatedData);
 
+        // print hash
+        console.log("finalHash: ", finalHash);
+
         // Set the final hash and progress to 100%
         setHash(finalHash);
         setProgress(100);
@@ -175,8 +241,10 @@ export default function UploadFile() {
           theme="light"
         />
 
-        {isFileHashed && !isFileUploadingToBlockchain && (
+        {isFileHashed && !isRequestedToOpenWallet && !isHashExist && (
           <UploadToBlockchainComponent
+            writeContract={writeContract}
+            transactionHash={transactionHash}
             setUploadFileResult={setUploadFileResult}
             fileName={file.name}
             fileSize={fileSize}
@@ -184,25 +252,18 @@ export default function UploadFile() {
             onUpload={undefined}
             setReset={setReset}
             toast={toast}
-            setIsFileUploadingToBlockchain={setIsFileUploadingToBlockchain}
+            setIRequestedToOpenWallet={setIRequestedToOpenWallet}
           />
         )}
-        {isFileUploadingToBlockchain && (
+        {isRequestedToOpenWallet && (
           <UploadProgressTracker
             currentStep={currentStep}
-            uploadFileResult={uploadFileResult}
-            toast={toast}
-            abi={undefined}
-            contractAddress={undefined}
-            fileHash={undefined}
-            noteBytesFixed={undefined}
-            address={undefined}
-            config={undefined}
-            setIsFileUploadingToBlockchain={setIsFileUploadingToBlockchain}
+            setIRequestedToOpenWallet={setIRequestedToOpenWallet}
+            resetAllStates={resetAllStates}
           />
         )}
-        {isFileHashing && !isFileUploadingToBlockchain && <WaitingFileHashing progress={progress} />}
-        {!isFileHashing && !isFileUploadingToBlockchain && !isFileHashed && (
+        {isFileHashing && !isRequestedToOpenWallet && <WaitingFileHashing progress={progress} />}
+        {!isFileHashing && !isRequestedToOpenWallet && !isFileHashed && (
           <>
             <div className="py-6">
               <svg

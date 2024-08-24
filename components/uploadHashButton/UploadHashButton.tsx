@@ -30,8 +30,6 @@ export default function UploadHashButton() {
     return null; // Ensure the component only renders on the client
   }
 
-  // print result
-  console.log("Result : ", result);
 
   return (
     <div className="w-full flex justify-center">
@@ -47,7 +45,8 @@ export default function UploadHashButton() {
               chain: undefined,
               account: address,
             });
-            console.log("Finished clicking !!");
+            // print result
+            console.log("Result on button click : ", result);
           }}
           className="bg-blue-500 text-white px-4 py-2 rounded mt-4"
         >

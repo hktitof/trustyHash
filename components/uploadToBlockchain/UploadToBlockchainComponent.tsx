@@ -5,26 +5,22 @@ import { config } from "../../config/config";
 import { abi, contractAddress } from "../../config/contract";
 
 const UploadToBlockchainComponent = ({
+  writeContract,
+  transactionHash,
   fileName,
   fileHash,
   onUpload,
   setReset,
   fileSize,
   toast,
-  setIsFileUploadingToBlockchain,
+  setIRequestedToOpenWallet,
   setUploadFileResult,
 }) => {
   const [note, setNote] = useState("");
   const [isUploading, setIsUploading] = useState(false);
-  const result = useWriteContract({
-    config,
-  });
-  const { writeContract } = result;
 
   const { address } = useAccount();
   const [isClient, setIsClient] = useState(false);
-  // remove the zero from right of notea
-  const { chainId } = useAccount();
 
   // Use useEffect to ensure code runs only on the client side
   useEffect(() => {
@@ -32,44 +28,22 @@ const UploadToBlockchainComponent = ({
   }, []);
 
   const handleUpload = async () => {
-    setIsUploading(true);
-    try {
-      //   await onUpload({ fileName, fileHash, note });
-      console.log("clicked Upload to Blockchain button !!");
-      // print note length
-      console.log("Note length:", note.length);
+    const noteBytes = ethers.encodeBytes32String(note);
 
-      const noteBytes = ethers.encodeBytes32String(note);
+    // fix note bytes to 25 bytes only count from left to the right
+    const noteBytesFixed = noteBytes.slice(0, 24);
+    // setIsFileUploadingToBlockchain(true);
+    writeContract({
+      abi,
+      address: contractAddress,
+      functionName: "storeHash",
+      args: [fileHash, noteBytesFixed],
+      chain: undefined,
+      account: address,
+    });
 
-      // print note bytes
-      console.log("Note bytes:", noteBytes);
-
-      // fix note bytes to 25 bytes only count from left to the right
-      const noteBytesFixed = noteBytes.slice(0, 24);
-      setIsFileUploadingToBlockchain(true);
-      const result = writeContract({
-        abi,
-        address: contractAddress,
-        functionName: "storeHash",
-        args: [fileHash, noteBytesFixed],
-        chain: undefined,
-        account: address,
-      });
-      setUploadFileResult(result);
-      //
-      // print result
-      console.log("Result when submitting : ", result);
-      console.log("Finished clicking !!");
-      // Handle successful upload (e.g., show success message, reset form, etc.)
-    } catch (error) {
-      // printing error on console
-      console.error("Error while uploading to blockchain", error);
-      toast.error(error.message);
-      setIsFileUploadingToBlockchain(false);
-      // Handle error (e.g., show error message)
-    } finally {
-      setIsUploading(false);
-    }
+    // set is Requested to open wallet to true
+    setIRequestedToOpenWallet(true);
   };
 
   // add on change event to the input field to handle the input text note to be maximum 25 bytes
@@ -81,30 +55,14 @@ const UploadToBlockchainComponent = ({
       // If the byte length exceeds 25, slice the string to ensure the byte length is within 25
       const trimmedNote = new TextDecoder().decode(noteBytes.slice(0, 25));
       setNote(trimmedNote);
-      console.log("Trimmed note:", trimmedNote);
     } else {
       setNote(note);
-      console.log("Note:", note);
     }
-  };
-
-  // convert file size from bytes to human readable format
-  const convertFileSize = (size: number) => {
-    const units = ["bytes", "KB", "MB", "GB", "TB"];
-    let unitIndex = 0;
-    while (size >= 1024 && unitIndex < units.length - 1) {
-      size /= 1024;
-      unitIndex++;
-    }
-    return `${size.toFixed(2)} ${units[unitIndex]}`;
   };
 
   if (!isClient) {
     return null; // Ensure the component only renders on the client
   }
-
-  // print result
-  console.log("Result : ", result);
 
   return (
     <div className="max-w-md mx-auto mt-10 px-6 pb-6 bg-white rounded-lg shadow-md">
@@ -144,7 +102,9 @@ const UploadToBlockchainComponent = ({
 
       <button
         onClick={async () => {
-          await handleUpload();
+          const result = await handleUpload();
+          // print result
+          console.log("Result on button click : ", result);
         }}
         disabled={isUploading}
         className={`w-full ${
@@ -189,3 +149,14 @@ const UploadToBlockchainComponent = ({
 };
 
 export default UploadToBlockchainComponent;
+
+// convert file size from bytes to human readable format
+const convertFileSize = (size: number) => {
+  const units = ["bytes", "KB", "MB", "GB", "TB"];
+  let unitIndex = 0;
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024;
+    unitIndex++;
+  }
+  return `${size.toFixed(2)} ${units[unitIndex]}`;
+};

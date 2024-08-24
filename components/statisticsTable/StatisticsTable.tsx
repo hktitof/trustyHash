@@ -1,7 +1,7 @@
 import { useReadContract } from "wagmi";
 import { config } from "../../config/config";
 import { abi, contractAddress } from "../../config/contract";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 
 type Hash = [
   {
@@ -14,6 +14,11 @@ type Hash = [
   }
 ];
 export default function StatisticsTable({}) {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortOrder, setSortOrder] = useState("desc"); // "asc" or "desc"
+
+  const [copiedItem, setCopiedItem] = useState(null);
+
   // declare totalHashes state
   const [totalHashes, setTotalHashes] = useState<Number | null>(null);
 
@@ -93,18 +98,71 @@ export default function StatisticsTable({}) {
   function shortOwnerAddressString(owner: string) {
     return owner.slice(0, 6) + "..." + owner.slice(owner.length - 6);
   }
+  function sortHashes(hashes, sortOrder) {
+    if (!hashes) return null;
 
-  // print result
-  console.log("Result : ", totalHashes);
+    return [...hashes].sort((a, b) => {
+      const dateA = Number(a.hashData.dateStored);
+      const dateB = Number(b.hashData.dateStored);
+      return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+    });
+  }
+  const filteredAndSortedHashes = useMemo(() => {
+    if (!hashes) return null;
 
-  // print result
-  console.log("Result : ", hashes);
+    const filtered = [...hashes].filter(
+      hash =>
+        hash.hashData.storedBy.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        hash.hash.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const sorted = filtered.sort((a, b) => {
+      const dateA = Number(a.hashData.dateStored);
+      const dateB = Number(b.hashData.dateStored);
+      return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+    });
+
+    return sorted;
+  }, [hashes, searchTerm, sortOrder]);
+
+  const copyToClipboard = (text, item) => {
+    console.log("Copying:", text); // Debug log
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        console.log("Copied successfully"); // Debug log
+        setCopiedItem(item);
+        setTimeout(() => setCopiedItem(null), 2000);
+      })
+      .catch(err => {
+        console.error("Failed to copy: ", err);
+      });
+  };
+
   return (
     <>
       <div className="flex  items-center justify-center  ">
         <div className="flex items-center justify-center ">
           <div className="overflow-x-auto relative shadow-md sm:rounded-lg">
             <div className="overflow-x-auto relative shadow-md sm:rounded-lg">
+              <div className="mb-4 flex items-center justify-between w-full">
+                <input
+                  type="text"
+                  placeholder="Search by owner address or hash"
+                  className="px-4 py-2 border rounded-md flex-grow mr-4"
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                />
+                <button
+                  className="px-4 py-2 bg-blue-500 text-white rounded-md"
+                  onClick={() => {
+                    const newSortOrder = sortOrder === "asc" ? "desc" : "asc";
+                    setSortOrder(newSortOrder);
+                  }}
+                >
+                  Sort by Date {sortOrder === "asc" ? "↑" : "↓"}
+                </button>
+              </div>
               <table className="w-full text-sm text-left text-gray-500 ">
                 <thead className="text-xs text-gray-700 uppercase bg-gray-50  dark:text-gray-400">
                   <tr>
@@ -126,19 +184,68 @@ export default function StatisticsTable({}) {
                   </tr>
                 </thead>
                 <tbody>
-                  {/* loop over hashes and display the data */}
-                  {hashes?.map((hash, index) => {
-                    return (
-                      <tr key={index} className={index % 2 === 0 ? "bg-white border-b" : "bg-gray-50 border-b"}>
-                        <td className="py-4 px-6">{index + 1}</td>
-                        <td className="py-4 px-6">{shortOwnerAddressString(hash.hashData.storedBy)}</td>
-                        <td className="py-4 px-6">{shortHashString(hash.hash)}</td>
-                        <td className="py-4 px-6">{convertTimestampToDate(hash.hashData.dateStored)}</td>
-                        <td className="py-4 px-6">{hexToString(hash.hashData.note)}</td>
-                      </tr>
-                    );
-                  })}
-                  {/* add a loading skeleton that with bouncing up and down when reading from smart contract*/}
+                  {filteredAndSortedHashes?.map((hash, index) => (
+                    <tr key={index} className={index % 2 === 0 ? "bg-white border-b" : "bg-gray-50 border-b"}>
+                      <td className="py-4 px-6">{index + 1}</td>
+                      <td className="py-4 px-6 relative group">
+                        <div
+                          className="flex items-center justify-between hover:cursor-pointer"
+                          onClick={() => copyToClipboard(hash.hashData.storedBy, `address-${index}`)}
+                        >
+                          <span>{shortOwnerAddressString(hash.hashData.storedBy)}</span>
+                          <button
+                            className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => copyToClipboard(hash.hashData.storedBy, `address-${index}`)}
+                          >
+                            {copiedItem === `address-${index}` ? (
+                              <span className="text-green-500 text-xs">Copied!</span>
+                            ) : (
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-5 w-5 text-gray-400"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                              >
+                                <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                                <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                              </svg>
+                            )}
+                          </button>
+                        </div>
+                      </td>
+                      <td className="py-4 px-6 relative group">
+                        <div
+                          className="flex items-center justify-between hover:cursor-pointer"
+                          onClick={() => copyToClipboard(hash.hash, `hash-${index}`)}
+                        >
+                          <span>{shortHashString(hash.hash)}</span>
+                          <button
+                            className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => copyToClipboard(hash.hash, `hash-${index}`)}
+                          >
+                            {copiedItem === `hash-${index}` ? (
+                              <span className="text-green-500 text-xs">Copied!</span>
+                            ) : (
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-5 w-5 text-gray-400"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                              >
+                                <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                                <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                              </svg>
+                            )}
+                          </button>
+                        </div>
+                      </td>{" "}
+                      <td className="py-4 px-6">{convertTimestampToDate(hash.hashData.dateStored)}</td>
+                      <td className="py-4 px-6">{hexToString(hash.hashData.note)}</td>
+                    </tr>
+                  ))}
+
+                 
+                  {/* // Add loading skeleton */}
                   {hashes == null &&
                     Array.from({ length: 3 }).map((_, index) => (
                       <tr key={index}>

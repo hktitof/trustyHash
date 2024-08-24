@@ -15,6 +15,16 @@ import { Account } from "../Account/Account";
 import { WalletOptions } from "../WalletOptions/WalletOptions";
 
 import { useAccount } from "wagmi";
+type Hash = [
+  {
+    hash: string;
+    hashData: {
+      note: string;
+      dateStored: bigint;
+      storedBy: string;
+    };
+  }
+];
 
 function ConnectWallet() {
   const { isConnected } = useAccount();
@@ -23,14 +33,8 @@ function ConnectWallet() {
 }
 
 export default function Home() {
-  const [walletConnected, setWalletConnected] = useState(false);
-  const [provider, setProvider] = useState(null);
-  const [contract, setContract] = useState(null);
-  const [statistics, setStatistics] = useState({
-    totalProofs: 0,
-    successfulVerifications: 0,
-    // Add more statistics as needed
-  });
+  // declare hashes state
+  const [hashes, setHashes] = useState<Hash | null>(null);
 
   return (
     <div className="bg-gray-100  min-h-screen">
@@ -38,7 +42,7 @@ export default function Home() {
         <ConnectWallet />
       </div> */}
       <Menu />
-      <Header />
+      <Header hashes={hashes} />
       <StatisticsTable />
       <div className="container mx-auto py-10 px-4">
         {/* <UploadSection contract={contract} />
