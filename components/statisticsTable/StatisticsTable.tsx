@@ -13,7 +13,7 @@ type Hash = [
     };
   }
 ];
-export default function StatisticsTable({}) {
+export default function StatisticsTable({ isHashExist, existedHash, hashes, setHashes }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOrder, setSortOrder] = useState("desc"); // "asc" or "desc"
 
@@ -23,7 +23,7 @@ export default function StatisticsTable({}) {
   const [totalHashes, setTotalHashes] = useState<Number | null>(null);
 
   // declare hashes state
-  const [hashes, setHashes] = useState<Hash | null>(null);
+  // const [hashes, setHashes] = useState<Hash | null>(null);
 
   const { data } = useReadContract({
     config,
@@ -32,6 +32,10 @@ export default function StatisticsTable({}) {
     functionName: "totalHashes",
     args: [],
   });
+  // print rendering StatisticsTable
+  console.log("Rendering StatisticsTable getting hashes");
+  // print hashes state
+  console.log("hashes", hashes);
 
   useEffect(() => {
     if (data) {
@@ -61,6 +65,20 @@ export default function StatisticsTable({}) {
       setHashes(result.data as Hash);
     }
   }, [result.data]);
+
+  useEffect(() => {
+    if (existedHash) {
+      setSearchTerm(existedHash);
+    }
+  }, [existedHash]);
+
+  // print rendering StatisticsTable
+  console.log("Rendering StatisticsTable");
+  // print existedHash
+  console.log("existedHash", existedHash);
+
+  // print isHashExist
+  console.log("isHashExist", isHashExist);
 
   // convert bigInt timestamp to date
   const convertTimestampToDate = (timestamp: bigint) => {
@@ -238,14 +256,12 @@ export default function StatisticsTable({}) {
                             )}
                           </button>
                         </div>
-                      </td>{" "}
+                      </td>
                       <td className="py-4 px-6">{convertTimestampToDate(hash.hashData.dateStored)}</td>
                       <td className="py-4 px-6">{hexToString(hash.hashData.note)}</td>
                     </tr>
                   ))}
 
-                 
-                  {/* // Add loading skeleton */}
                   {hashes == null &&
                     Array.from({ length: 3 }).map((_, index) => (
                       <tr key={index}>
@@ -266,7 +282,7 @@ export default function StatisticsTable({}) {
                         </td>
                       </tr>
                     ))}
-                </tbody>
+                </tbody>{" "}
               </table>
             </div>
           </div>

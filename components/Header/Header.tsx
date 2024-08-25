@@ -2,7 +2,7 @@ import { useState } from "react";
 
 // import components
 import UploadFile from "../uploadFile/UploadFile";
-export default function Header({ hashes }) {
+export default function Header({ hashes, isHashExist, setIsHashExist, setExistedHash }) {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   const toggleDarkMode = () => {
@@ -25,7 +25,12 @@ export default function Header({ hashes }) {
         </div>
       </div>
       <div className="w-full flex justify-center">
-        <UploadFile hashes={hashes} />
+        <UploadFile
+          hashes={hashes}
+          isHashExist={isHashExist}
+          setIsHashExist={setIsHashExist}
+          setExistedHash={setExistedHash}
+        />
       </div>
     </section>
   );

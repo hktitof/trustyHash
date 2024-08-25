@@ -35,6 +35,10 @@ function ConnectWallet() {
 export default function Home() {
   // declare hashes state
   const [hashes, setHashes] = useState<Hash | null>(null);
+  // declare state that will determine if the hash already exist in the blockchain
+  const [isHashExist, setIsHashExist] = useState(false);
+  // declare state that will store the existed hash
+  const [existedHash, setExistedHash] = useState<string | null>(null);
 
   return (
     <div className="bg-gray-100  min-h-screen">
@@ -42,8 +46,13 @@ export default function Home() {
         <ConnectWallet />
       </div> */}
       <Menu />
-      <Header hashes={hashes} />
-      <StatisticsTable />
+      <Header
+        hashes={hashes}
+        isHashExist={isHashExist}
+        setIsHashExist={setIsHashExist}
+        setExistedHash={setExistedHash}
+      />
+      <StatisticsTable hashes={hashes} setHashes={setHashes} isHashExist={isHashExist} existedHash={existedHash} />
       <div className="container mx-auto py-10 px-4">
         {/* <UploadSection contract={contract} />
         <VerificationSection contract={contract} />

@@ -16,7 +16,7 @@ import { useAccount, useWriteContract } from "wagmi";
 
 // import arrayify
 
-export default function UploadFile({ hashes }) {
+export default function UploadFile({ hashes, isHashExist, setIsHashExist, setExistedHash }) {
   const [file, setFile] = useState<File | null>(null);
   const [hash, setHash] = useState<string | null>(null);
   // state that will track is the file is selected so we can show spinner for hashing
@@ -93,18 +93,17 @@ export default function UploadFile({ hashes }) {
   });
 
   // declare state that will determine if the hash already exist in the blockchain
-  const [isHashExist, setIsHashExist] = useState(false);
+  // const [isHashExist, setIsHashExist] = useState(false);
+  // declare state that will store the existed hash
+  // const [existedHash, setExistedHash] = useState<string | null>(null);
 
   // show toast error and reset the states if the hash already exist
   useEffect(() => {
     if (isHashExist) {
-      toast.error("Hash already exist in the blockchain");
+      toast("Hash file already exist in the blockchain");
       // setIsHashExist(false);
     }
   }, [isHashExist]);
-
-  // print the transaction hash
-  console.log("Transaction Hash: ", transactionHash);
 
   // create a useEffect that will reset all the states if the reset state is true
   useEffect(() => {
@@ -195,8 +194,25 @@ export default function UploadFile({ hashes }) {
         // print hash
         console.log("finalHash: ", finalHash);
 
+        // print Determine hash...
+        console.log("Determine hash...");
+        // print hashes
+        console.log("hashes: ", hashes);
+
+        // compare finalHash if it's already exist in the blockchain in hashes parameter
+        if (hashes) {
+          const hashExist = hashes.find(hash => hash.hash === finalHash);
+          if (hashExist) {
+            setIsHashExist(true);
+            setExistedHash(finalHash);
+            setHash(null);
+          }
+        } else {
+          setIsHashExist(false);
+          setHash(finalHash);
+        }
+
         // Set the final hash and progress to 100%
-        setHash(finalHash);
         setProgress(100);
         // set the file size
         setFileSize(selectedFile.size);
