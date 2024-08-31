@@ -199,18 +199,21 @@ export default function UploadFile({ hashes, isHashExist, setIsHashExist, setExi
         // print hashes
         console.log("hashes: ", hashes);
 
+
+
         // compare finalHash if it's already exist in the blockchain in hashes parameter
         if (hashes) {
           const hashExist = hashes.find(hash => hash.hash === finalHash);
           if (hashExist) {
             setIsHashExist(true);
             setExistedHash(finalHash);
-            setHash(null);
+            // setHash(null);
           }
         } else {
           setIsHashExist(false);
-          setHash(finalHash);
+          // setHash(finalHash);
         }
+        setHash(finalHash);
 
         // Set the final hash and progress to 100%
         setProgress(100);
@@ -293,7 +296,7 @@ export default function UploadFile({ hashes, isHashExist, setIsHashExist, setExi
               <h4 className="text-base font-semibold text-gray-600">Drag and drop files here</h4>
             </div>
             <hr className="w-full border-gray-400 my-2" />
-            <div className="py-6">
+            <div className="p-10">
               <input
                 type="file"
                 id="uploadFile1"
@@ -306,7 +309,7 @@ export default function UploadFile({ hashes, isHashExist, setIsHashExist, setExi
               >
                 Browse Files
               </label>
-              <p className="text-xs text-gray-400 mt-4">PNG, JPG, SVG, WEBP, and GIF are Allowed.</p>
+              {/* <p className="text-xs text-gray-400 mt-4">PNG, JPG, SVG, WEBP, and GIF are Allowed.</p> */}
             </div>
           </>
         )}
