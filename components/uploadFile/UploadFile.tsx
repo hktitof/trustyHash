@@ -190,17 +190,6 @@ export default function UploadFile({ hashes, isHashExist, setIsHashExist, setExi
       // Generate the final hash
       try {
         const finalHash = keccak256(concatenatedData);
-
-        // print hash
-        console.log("finalHash: ", finalHash);
-
-        // print Determine hash...
-        console.log("Determine hash...");
-        // print hashes
-        console.log("hashes: ", hashes);
-
-
-
         // compare finalHash if it's already exist in the blockchain in hashes parameter
         if (hashes) {
           const hashExist = hashes.find(hash => hash.hash === finalHash);
