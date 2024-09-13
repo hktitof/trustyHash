@@ -265,6 +265,7 @@ export default function UploadFile({ hashes, isHashExist, setIsHashExist, setExi
         )}
         {isRequestedToOpenWallet && (
           <UploadProgressTracker
+            transactionHash={transactionHash}
             currentStep={currentStep}
             setIRequestedToOpenWallet={setIRequestedToOpenWallet}
             resetAllStates={resetAllStates}

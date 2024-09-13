@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const UploadProgressTracker = ({ currentStep, setIRequestedToOpenWallet, resetAllStates }) => {
+const UploadProgressTracker = ({ currentStep, setIRequestedToOpenWallet, resetAllStates, transactionHash }) => {
   const [steps] = useState([
     { id: 1, name: "Wallet Approval", description: "Waiting for wallet approval" },
     { id: 2, name: "Transaction Submission", description: "Waiting Submitting transaction to the blockchain" },
@@ -68,6 +68,22 @@ const UploadProgressTracker = ({ currentStep, setIRequestedToOpenWallet, resetAl
           </React.Fragment>
         ))}
       </div>
+        {/* // add text in the center informing the user to click here and please follow the transaction progress in etherscan if there is any error occuded */}
+        {currentStep === 2 && (
+        <div className="text-center mt-4 text-sm text-gray-600">
+          <p>Transaction submitted. Please track progress on Etherscan if any error occurred:</p>
+          <button
+            onClick={() => {
+              /* Add your logic to open Etherscan with the transaction hash */
+              // open a new tab with the transaction hash
+              window.open("https://sepolia.etherscan.io//tx/" + transactionHash, "_blank");
+            }}
+            className="mt-1 text-blue-600 hover:text-blue-800 underline focus:outline-none text-xs"
+          >
+            View transaction details
+          </button>
+        </div>
+      )}
       {/* Add a go back button that changes state to false for isFileUploadingToBlockchain */}
       {/* <button
         onClick={() => {
