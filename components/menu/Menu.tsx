@@ -26,7 +26,7 @@ const Menu = () => {
     <header className="bg-white shadow-md">
       <div className="container mx-auto flex justify-between items-center py-4 px-4">
         <div className="flex items-center">
-          <img src="/logo.svg" alt="TrustyHash" className="h-8" />
+          <img src="/logo.png" alt="TrustyHash" className="h-16" />
         </div>
         <div className="flex items-center space-x-4">
           <ConnectWalletButton />

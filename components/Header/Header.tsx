@@ -30,6 +30,7 @@ export default function Header({ hashes, isHashExist, setIsHashExist, setExisted
           isHashExist={isHashExist}
           setIsHashExist={setIsHashExist}
           setExistedHash={setExistedHash}
+          // add resetAllStates
         />
       </div>
     </section>

@@ -15,6 +15,7 @@ import { Account } from "../Account/Account";
 import { WalletOptions } from "../WalletOptions/WalletOptions";
 
 import { useAccount } from "wagmi";
+import { reset } from "viem/actions";
 type Hash = [
   {
     hash: string;
@@ -52,7 +53,14 @@ export default function Home() {
         setIsHashExist={setIsHashExist}
         setExistedHash={setExistedHash}
       />
-      <StatisticsTable hashes={hashes} setHashes={setHashes} isHashExist={isHashExist} existedHash={existedHash} />
+      <StatisticsTable
+        hashes={hashes}
+        setHashes={setHashes}
+        isHashExist={isHashExist}
+        setIsHashExist={setIsHashExist}
+        existedHash={existedHash}
+        // resetAllStates={resetAllStates}
+      />
       <div className="container mx-auto py-10 px-4">
         {/* <UploadSection contract={contract} />
         <VerificationSection contract={contract} />

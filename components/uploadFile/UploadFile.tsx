@@ -103,7 +103,7 @@ export default function UploadFile({ hashes, isHashExist, setIsHashExist, setExi
       toast("Hash file already exist in the blockchain");
       // setIsHashExist(false);
     }
-  }, [isHashExist]);
+  }, [isHashExist, setIsHashExist]);
 
   // create a useEffect that will reset all the states if the reset state is true
   useEffect(() => {
@@ -123,7 +123,7 @@ export default function UploadFile({ hashes, isHashExist, setIsHashExist, setExi
       // check if the hash already exist
       if (data) {
         // show toast that the hash already exist
-        setIsHashExist(true);
+        // setIsHashExist(true);
 
         // reset the states by reversing these states (!isFileHashing && !isRequestedToOpenWallet && !isFileHashed)
         setIsFileHashed(false);
@@ -232,7 +232,9 @@ export default function UploadFile({ hashes, isHashExist, setIsHashExist, setExi
       <div
         onDrop={handleDrop}
         onDragOver={handleDragOver}
-        className={`bg-gray-50 text-center px-4 max-w-96 rounded flex flex-col items-center justify-center ${
+        className={`bg-gray-50 text-center px-4 ${
+          currentStep > 1 ? "w-full" : " max-w-96"
+        }rounded flex flex-col items-center justify-center ${
           !isFileHashed ? "cursor-pointer" : ""
         } border-2 border-gray-400 border-dashed font-[sans-serif]`}
       >

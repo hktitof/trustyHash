@@ -13,7 +13,7 @@ type Hash = [
     };
   }
 ];
-export default function StatisticsTable({ isHashExist, existedHash, hashes, setHashes }) {
+export default function StatisticsTable({ isHashExist, existedHash, hashes, setHashes, setIsHashExist }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOrder, setSortOrder] = useState("desc"); // "asc" or "desc"
 
@@ -69,8 +69,10 @@ export default function StatisticsTable({ isHashExist, existedHash, hashes, setH
   useEffect(() => {
     if (existedHash) {
       setSearchTerm(existedHash);
+      setIsHashExist(true);
+      // resetAllStates();
     }
-  }, [existedHash]);
+  }, [existedHash, setIsHashExist]);
 
   // print rendering StatisticsTable
   console.log("Rendering StatisticsTable");

@@ -57,8 +57,8 @@ const UploadProgressTracker = ({ currentStep, setIRequestedToOpenWallet, resetAl
                   step.id
                 )}
               </div>
-              <div className="text-xs mt-2 text-center">
-                <div className="font-semibold">{step.name}</div>
+              <div className="text-xs mt-2 text-center w-full flex-none">
+                <div className="font-semibold ">{step.name}</div>
                 <div className="text-gray-500">{step.description}</div>
               </div>
             </div>
@@ -68,8 +68,8 @@ const UploadProgressTracker = ({ currentStep, setIRequestedToOpenWallet, resetAl
           </React.Fragment>
         ))}
       </div>
-        {/* // add text in the center informing the user to click here and please follow the transaction progress in etherscan if there is any error occuded */}
-        {currentStep === 2 && (
+      {/* // add text in the center informing the user to click here and please follow the transaction progress in etherscan if there is any error occuded */}
+      {currentStep === 2 && (
         <div className="text-center mt-4 text-sm text-gray-600">
           <p>Transaction submitted. Please track progress on Etherscan if any error occurred:</p>
           <button
@@ -82,6 +82,30 @@ const UploadProgressTracker = ({ currentStep, setIRequestedToOpenWallet, resetAl
           >
             View transaction details
           </button>
+        </div>
+      )}
+      {currentStep === 3 && (
+        <div className="text-center mt-4 ">
+          <h4 className="text-lg font-semibold text-green-600 cursor-default">Upload Complete!</h4>
+          <p className="text-gray-500 text-sm">Your file has been successfully uploaded to the blockchain.</p>
+          <p
+            onClick={
+              // resetAllStates
+              // refresh the page
+              () => {
+                window.location.reload();
+              }
+            }
+            className="text-black underline text-sm mt-2"
+          >
+            Upload another file or verify your file&apos;s existence.
+          </p>
+          {/* <button
+            className="mt-4 px-6 py-2.5 rounded bg-blue-500 text-white text-sm tracking-wider cursor-pointer font-semibold hover:bg-blue-400"
+            onClick={resetAllStates}
+          >
+            Upload Another File
+          </button> */}
         </div>
       )}
       {/* Add a go back button that changes state to false for isFileUploadingToBlockchain */}

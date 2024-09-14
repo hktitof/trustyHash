@@ -2,7 +2,7 @@ import React from "react";
 
 export default function WaitingFileHashing({ progress }) {
   return (
-    <div className="bg-gray-50 bg-opacity-90 w-72 h-80 flex flex-col items-center justify-center cursor-pointer border-2 border-gray-400 border-dashed font-[sans-serif]">
+    <div className="bg-gray-50 bg-opacity-90 w-72 h-80 flex flex-col items-center justify-center border-2 border-gray-400 border-dashed font-[sans-serif]">
       <div className="text-gray-1 font-black">Please wait the file is Hashing</div>
       <div className="text-gray-600 mt-4">{progress}%</div>
       <svg
