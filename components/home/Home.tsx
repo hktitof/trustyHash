@@ -40,6 +40,8 @@ export default function Home() {
   const [isHashExist, setIsHashExist] = useState(false);
   // declare state that will store the existed hash
   const [existedHash, setExistedHash] = useState<string | null>(null);
+  const [isFileHashed, setIsFileHashed] = useState(false);
+
 
   return (
     <div className="bg-gray-100  min-h-screen">
@@ -52,6 +54,10 @@ export default function Home() {
         isHashExist={isHashExist}
         setIsHashExist={setIsHashExist}
         setExistedHash={setExistedHash}
+        existedHash={existedHash}
+
+        isFileHashed={isFileHashed}
+        setIsFileHashed={setIsFileHashed}
       />
       <StatisticsTable
         hashes={hashes}
@@ -59,6 +65,7 @@ export default function Home() {
         isHashExist={isHashExist}
         setIsHashExist={setIsHashExist}
         existedHash={existedHash}
+        isFileHashed={isFileHashed}
         // resetAllStates={resetAllStates}
       />
       <div className="container mx-auto py-10 px-4">

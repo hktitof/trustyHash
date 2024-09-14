@@ -3,6 +3,9 @@ import { ethers, toUtf8Bytes } from "ethers";
 import { useAccount, useWriteContract } from "wagmi";
 import { config } from "../../config/config";
 import { abi, contractAddress } from "../../config/contract";
+import { reset } from "viem/actions";
+// import useRef from react
+import { useRef } from "react";
 
 const UploadToBlockchainComponent = ({
   writeContract,
@@ -16,6 +19,8 @@ const UploadToBlockchainComponent = ({
   setIRequestedToOpenWallet,
   setUploadFileResult,
 }) => {
+  const uploadFileRef = useRef<{ resetAllStates: () => void }>(null);
+
   const [note, setNote] = useState("");
   const [isUploading, setIsUploading] = useState(false);
 
@@ -137,6 +142,9 @@ const UploadToBlockchainComponent = ({
         <a
           onClick={() => {
             setReset(true);
+            if (uploadFileRef.current) {
+              uploadFileRef.current.resetAllStates();
+            }
           }}
           href="#"
           className="underline"

@@ -2,7 +2,7 @@ import { useState } from "react";
 
 // import components
 import UploadFile from "../uploadFile/UploadFile";
-export default function Header({ hashes, isHashExist, setIsHashExist, setExistedHash }) {
+export default function Header({ hashes, isHashExist, setIsHashExist, existedHash, setExistedHash, isFileHashed, setIsFileHashed }) {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   const toggleDarkMode = () => {
@@ -30,6 +30,9 @@ export default function Header({ hashes, isHashExist, setIsHashExist, setExisted
           isHashExist={isHashExist}
           setIsHashExist={setIsHashExist}
           setExistedHash={setExistedHash}
+          existedHash={existedHash}
+          isFileHashed={isFileHashed}
+          setIsFileHashed={setIsFileHashed}
           // add resetAllStates
         />
       </div>

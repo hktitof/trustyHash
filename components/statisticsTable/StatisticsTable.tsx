@@ -1,7 +1,8 @@
 import { useReadContract } from "wagmi";
 import { config } from "../../config/config";
 import { abi, contractAddress } from "../../config/contract";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
+import UploadFile from "../uploadFile/UploadFile";
 
 type Hash = [
   {
@@ -13,7 +14,9 @@ type Hash = [
     };
   }
 ];
-export default function StatisticsTable({ isHashExist, existedHash, hashes, setHashes, setIsHashExist }) {
+export default function StatisticsTable({ isHashExist, existedHash, hashes, setHashes, setIsHashExist, isFileHashed }) {
+  const uploadFileRef = useRef<{ resetAllStates: () => void }>(null);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOrder, setSortOrder] = useState("desc"); // "asc" or "desc"
 
@@ -67,12 +70,21 @@ export default function StatisticsTable({ isHashExist, existedHash, hashes, setH
   }, [result.data]);
 
   useEffect(() => {
-    if (existedHash) {
+    if (isHashExist) {
       setSearchTerm(existedHash);
-      setIsHashExist(true);
-      // resetAllStates();
+
+      // if (uploadFileRef.current) {
+      //   uploadFileRef.current.resetAllStates();
+      // }
     }
-  }, [existedHash, setIsHashExist]);
+  }, [existedHash, isHashExist, setIsHashExist]);
+
+  // empty search input if isFileHashed is true and isHashExist is false
+  useEffect(() => {
+    if (isFileHashed && !isHashExist) {
+      setSearchTerm("");
+    }
+  }, [isFileHashed, isHashExist]);
 
   // print rendering StatisticsTable
   console.log("Rendering StatisticsTable");

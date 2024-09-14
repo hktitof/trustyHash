@@ -96,7 +96,7 @@ const UploadProgressTracker = ({ currentStep, setIRequestedToOpenWallet, resetAl
                 window.location.reload();
               }
             }
-            className="text-black underline text-sm mt-2"
+            className="text-black underline text-sm mt-2 cursor-pointer"
           >
             Upload another file or verify your file&apos;s existence.
           </p>
