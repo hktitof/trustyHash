@@ -3,6 +3,7 @@
 import { useState } from "react";
 // import { Search } from 'lucide-react';
 
+import ConnectButton from "./ConnectButton";
 interface HashEntry {
   hash: string;
   date: string;
@@ -24,14 +25,7 @@ export default function FileHashInterface() {
           <span className="font-semibold">Trusty Hash</span>
         </div>
 
-        <button className="px-5 py-2 flex space-x-2 items-center font-extrabold bg-gradient-to-r from-emerald-400 to-blue-500 rounded-lg">
-          <svg viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 text-white">
-            <path d="M20 7V5c0-1.103-.897-2-2-2H5C3.346 3 2 4.346 2 6v12c0 2.201 1.794 3 3 3h15c1.103 0 2-.897 2-2V9c0-1.103-.897-2-2-2zm-2 9h-2v-4h2v4zM5 7a1.001 1.001 0 010-2h13v2H5z" />
-          </svg>
-          <div className="flex whitespace-nowrap">
-            <span className="text-white">Connect Wallet</span>
-          </div>
-        </button>
+        <ConnectButton />
       </nav>
 
       <div className="max-w-4xl mx-auto">
