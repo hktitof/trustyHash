@@ -11,14 +11,14 @@ export default function ConnectButton() {
         return (
           <button
             onClick={show}
-            className="px-5 py-2 flex space-x-2 items-center font-extrabold bg-gradient-to-r from-emerald-400 to-blue-500 rounded-lg"
+            className="px-5 py-2 flex space-x-2 items-center font-extrabold bg-gradient-to-r from-emerald-400 to-blue-500 rounded-lg cursor-pointer"
           >
             {!isConnected && !isConnecting && (
               <svg viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 text-white">
                 <path d="M20 7V5c0-1.103-.897-2-2-2H5C3.346 3 2 4.346 2 6v12c0 2.201 1.794 3 3 3h15c1.103 0 2-.897 2-2V9c0-1.103-.897-2-2-2zm-2 9h-2v-4h2v4zM5 7a1.001 1.001 0 010-2h13v2H5z" />
               </svg>
             )}
-            {/* // add tailwind css spinger icon */}
+            {/* // add tailwind css spinger icon */}        
             {isConnecting && (
               <svg
                 aria-hidden="true"

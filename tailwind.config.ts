@@ -11,4 +11,7 @@ export default {
     extend: {},
   },
   plugins: [],
+  variants: {
+    extend: {},
+  },
 } satisfies Config;

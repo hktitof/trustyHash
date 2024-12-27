@@ -3,9 +3,11 @@ import { WagmiProvider, createConfig } from "wagmi";
 import { mainnet, sepolia } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ConnectKitProvider, getDefaultConfig } from "connectkit";
-
+import { http } from "viem";
 const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "";
 const networkName = process.env.NEXT_PUBLIC_NETWORK_NAME || "sepolia";
+// create sepolia rpc url from the environment variable
+const sepoliaRpcUrl = process.env.NEXT_PUBLIC_INFURA_RPC_URL || "";
 
 const config = createConfig(
   getDefaultConfig({
@@ -14,7 +16,7 @@ const config = createConfig(
     transports: {
       // RPC URL for each chain
       //   [mainnet.id]: http(`https://eth-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_ID}`),
-      //   [sepolia.id]: http(`https://eth-sepolia.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_ID}`),
+      [sepolia.id]: http(sepoliaRpcUrl),
     },
 
     // Required API Keys
@@ -29,6 +31,14 @@ const config = createConfig(
     appIcon: "https://family.co/logo.png", // your app's icon, no bigger than 1024x1024px (max. 1MB)
   })
 );
+
+// through an error on the console if projectId or sepoliaRpcUrl is empty
+if (!projectId) {
+  console.error("WalletConnect Project ID is not defined");
+}
+if (!sepoliaRpcUrl) {
+  console.error("Sepolia RPC URL is not defined");
+}
 
 const queryClient = new QueryClient();
 
