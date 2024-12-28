@@ -130,7 +130,7 @@ export default function FileUploadSection() {
     // print fileHash and note to console
     console.log("File Hash:", fileHash);
     console.log("Note:", note);
-    const notenoteBytes = ethers.encodeBytes32String("note");
+    const notenoteBytes = ethers.encodeBytes32String(note);
     writeContract({
       address: smartContractAddress,
       abi: smartContractABI,

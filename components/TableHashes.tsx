@@ -69,7 +69,7 @@ export default function TableHashes() {
           address: item.hashData.storedBy,
           note: new TextDecoder().decode(
             typeof item.hashData.note === "string"
-              ? Uint8Array.from(item.hashData.note, c => c.charCodeAt(0))
+              ? Uint8Array.from(item.hashData.note, (c: string) => c.charCodeAt(0))
               : item.hashData.note
           ),
         }));
@@ -122,6 +122,22 @@ export default function TableHashes() {
       .catch(err => {
         console.error("Failed to copy: ", err);
       });
+  };
+
+  // create a function that converts string which is a form of hex to string
+  const noteToHexToString = (hex: string): string => {
+    // print hex
+    console.log("Hex : ", hex);
+    let str = "";
+    for (let i = 0; i < hex.length; i += 2) {
+      // Extract a pair of hex characters and convert them to a decimal number
+      const hexPair = hex.substr(i, 2);
+      const decimal = parseInt(hexPair, 16);
+
+      // Convert the decimal number to a character and append it to the result string
+      str += String.fromCharCode(decimal);
+    }
+    return str;
   };
 
   return (
@@ -186,29 +202,34 @@ export default function TableHashes() {
                       </div>
                     </td>
                     <td className="p-4">{item.date}</td>
-                    <td className="p-4 font-mono flex">
-                      <div title={item.address} className="cursor-pointer flex">
-                        {/* // slice the address to show only the first 6 and last 4 characters */}
-                        <span className="">
-                          {item.address.slice(0, 6)}...{item.address.slice(-4)}
-                        </span>
-                        <CopyToClipboard text={item.address}>
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-4 w-4 inline-block ml-2 text-gray-400 hover:text-blue-500"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M8 16V8M11 16V8M14 16V8l4-4-4-4v-4c-1.5 0-3 .5-4 1.5V5a2 2 0 00-2-2H7a2 2 0 00-2 2v1.5C4.5 6.5 3 7 1.5 8S0 9.5 0 11v4l4 4 4 4v4c1.5 0 3-.5 4-1.5v-1.5a2 2 0 00-2-2z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        </CopyToClipboard>
+                    <td className="py-4 px-6 relative group">
+                      <div
+                        className="flex items-center justify-between hover:cursor-pointer"
+                        onClick={() => copyToClipboard(item.address, `address-${index}`)}
+                      >
+                        <span>{item.address.slice(0, 6) + "..." + item.address.slice(item.address.length - 6)}</span>
+                        <button
+                          className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => copyToClipboard(item.address, `address-${index}`)}
+                        >
+                          {copiedItem === `address-${index}` ? (
+                            <span className="text-green-500 text-xs">Copied!</span>
+                          ) : (
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-5 w-5 text-gray-400"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                              <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                            </svg>
+                          )}
+                        </button>
                       </div>
                     </td>
-                    <td className="p-4 truncate max-w-xs">{item.note}</td>
+
+                    <td className="p-4 truncate max-w-xs">{noteToHexToString(item.note)}</td>
                   </tr>
                 ))
               ) : (
