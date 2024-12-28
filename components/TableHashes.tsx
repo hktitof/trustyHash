@@ -24,6 +24,11 @@ export default function TableHashes() {
   const [searchTerm, setSearchTerm] = useState("");
   const hashesPerPage = 20;
   const [copiedItem, setCopiedItem] = useState(null);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isHashVerified, setIsHashVerified] = useState(false);
+  const [hashData, setHashData] = useState<any>(null);
+
+
 
   const {
     data: totalHashes,
@@ -59,13 +64,33 @@ export default function TableHashes() {
     console.error("Error fetching total hashes", error);
   }
 
+  const formatDateTime = (timestamp: number) => {
+    const date = new Date(timestamp * 1000);
+
+    // Time components
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    const seconds = date.getSeconds().toString().padStart(2, "0");
+
+    // Date components
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0"); // +1 because months are 0-based
+    const year = date.getFullYear();
+
+    // Construct the string however you want
+    const time = `${hours}:${minutes}`;
+    const dateStr = `${day}/${month}/${year}`;
+
+    return `${time} - ${dateStr}`;
+  };
+
   useEffect(() => {
     if (lastHashesWithData && Array.isArray(lastHashesWithData)) {
       const newHashes = lastHashesWithData
         .slice(currentPage * hashesPerPage, (currentPage + 1) * hashesPerPage)
         .map(item => ({
           hash: item.hash,
-          date: new Date(Number(item.hashData.dateStored) * 1000).toLocaleDateString(),
+          date: formatDateTime(Number(item.hashData.dateStored)),
           address: item.hashData.storedBy,
           note: new TextDecoder().decode(
             typeof item.hashData.note === "string"

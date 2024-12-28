@@ -15,6 +15,8 @@ export default function FileUploadSection() {
   const [isStoring, setIsStoring] = useState(false);
   const [isStored, setIsStored] = useState(false);
   const [storageError, setStorageError] = useState<string | null>(null);
+  // create isHashExisted state
+  const [isHashExisted, setIsHashExisted] = useState(false);
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return "0 Bytes";
@@ -77,25 +79,22 @@ export default function FileUploadSection() {
             throw new Error("Failed to read file");
           }
 
-          // Convert to Uint8Array if it's not already
           const content =
             e.target.result instanceof ArrayBuffer
               ? new Uint8Array(e.target.result)
               : new TextEncoder().encode(e.target.result as string);
 
-          // Generate Keccak256 hash - this is Ethereum's preferred hash function
+          // Get the hash and ensure it's in bytes32 format
           const hash = keccak256(content);
-
-          // The hash will already be in the correct format for Ethereum
+          console.log("Generated hash:", hash);
           resolve(hash);
         } catch (error) {
+          console.error('Error in calculateHash:', error);
           reject(error);
         }
       };
 
       reader.onerror = () => reject(new Error("Failed to read file"));
-
-      // Read the file as ArrayBuffer
       reader.readAsArrayBuffer(file);
     });
   };
@@ -123,20 +122,39 @@ export default function FileUploadSection() {
 
   // Replace storeHashInContract with Wagmi version
   const storeHashInContract = async (fileHash: string, note: string) => {
+    if (!fileHash) {
+      setStorageError("No file hash provided");
+      return;
+    }
+
     if (note.length > 250) {
       setStorageError("Note cannot exceed 250 characters");
       return;
     }
-    // print fileHash and note to console
-    console.log("File Hash:", fileHash);
-    console.log("Note:", note);
-    const notenoteBytes = ethers.encodeBytes32String(note);
-    writeContract({
-      address: smartContractAddress,
-      abi: smartContractABI,
-      functionName: "storeHash",
-      args: [fileHash, notenoteBytes],
-    });
+
+    try {
+      // Convert the note to a UTF-8 encoded byte array
+      const noteBytes = new TextEncoder().encode(note);
+      
+      // Convert to a Uint8Array for proper bytes formatting
+      const noteArray = Array.from(noteBytes);
+      
+      // Convert to the format expected by the contract
+      const noteHex = '0x' + noteArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+      console.log("File Hash:", fileHash);
+      console.log("Note bytes:", noteHex);
+
+      writeContract({
+        address: smartContractAddress,
+        abi: smartContractABI,
+        functionName: "storeHash",
+        args: [fileHash, noteHex],
+      });
+    } catch (error) {
+      console.error("Error in storeHashInContract:", error);
+      setStorageError(error instanceof Error ? error.message : "Error processing data");
+    }
   };
 
   // Update renderStorageButton() to include note input
@@ -155,7 +173,11 @@ export default function FileUploadSection() {
         </div>
       );
     }
+    // print contract Error : contractError
+    console.log("Contract Error:", contractError);
 
+    // print storage Error : storageError
+    console.log("Storage Error:", storageError);
     return (
       <div className="space-y-4">
         <div className="space-y-2">
@@ -198,7 +220,9 @@ export default function FileUploadSection() {
             </>
           )}
         </button>
-        {contractError && <div className="text-red-400 text-sm bg-red-400/10 p-2 rounded overflow-hidden">{contractError.message}</div>}
+        {contractError && (
+          <div className="text-red-400 text-sm bg-red-400/10 p-2 rounded overflow-hidden">{contractError.message}</div>
+        )}
         {storageError && (
           <div className="text-wrap text-red-400 text-sm bg-red-400/10 p-2 rounded overflow-hidden">{storageError}</div>
         )}
