@@ -1,8 +1,9 @@
 import { useState, useCallback, useRef } from "react";
 import { keccak256 } from "ethers";
-import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { useWriteContract, useWaitForTransactionReceipt, useReadContract } from "wagmi";
 import { smartContractAddress, smartContractABI } from "../config/smartContract";
 import { ethers } from "ethers";
+import HashDetails from "./HashDetails";
 export default function FileUploadSection() {
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -17,6 +18,7 @@ export default function FileUploadSection() {
   const [storageError, setStorageError] = useState<string | null>(null);
   // create isHashExisted state
   const [isHashExisted, setIsHashExisted] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return "0 Bytes";
@@ -63,6 +65,7 @@ export default function FileUploadSection() {
   const removeFile = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     setFile(null);
+    setFileHash(null); // Add this line to reset the hash
     // Reset the input value
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -89,7 +92,7 @@ export default function FileUploadSection() {
           console.log("Generated hash:", hash);
           resolve(hash);
         } catch (error) {
-          console.error('Error in calculateHash:', error);
+          console.error("Error in calculateHash:", error);
           reject(error);
         }
       };
@@ -99,11 +102,23 @@ export default function FileUploadSection() {
     });
   };
 
+  // Add hash verification using useReadContract
+  const { data: hashExists } = useReadContract({
+    address: smartContractAddress,
+    abi: smartContractABI,
+    functionName: "verifyHash",
+    args: fileHash ? [fileHash] : undefined,
+    query: {
+      enabled: !!fileHash,
+    },
+  });
+
   const handleHashFile = async () => {
     if (!file) return;
 
     try {
       setIsHashing(true);
+      setIsVerifying(true);
       const hash = await calculateHash(file);
       setFileHash(hash);
     } catch (error) {
@@ -111,6 +126,7 @@ export default function FileUploadSection() {
       alert("Error generating hash");
     } finally {
       setIsHashing(false);
+      setIsVerifying(false);
     }
   };
 
@@ -135,12 +151,12 @@ export default function FileUploadSection() {
     try {
       // Convert the note to a UTF-8 encoded byte array
       const noteBytes = new TextEncoder().encode(note);
-      
+
       // Convert to a Uint8Array for proper bytes formatting
       const noteArray = Array.from(noteBytes);
-      
+
       // Convert to the format expected by the contract
-      const noteHex = '0x' + noteArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      const noteHex = "0x" + noteArray.map(b => b.toString(16).padStart(2, "0")).join("");
 
       console.log("File Hash:", fileHash);
       console.log("Note bytes:", noteHex);
@@ -230,6 +246,50 @@ export default function FileUploadSection() {
     );
   };
 
+  // Update the hash display section to show verification status
+  const renderHashSection = () => {
+    if (!fileHash || !file) return null;
+  
+    return (
+      <div className="bg-gray-800 rounded-lg p-4 mb-4 space-y-4">
+        <div className="space-y-2">
+          <p className="text-white font-bold">File Hash (Keccak-256):</p>
+          <div className="bg-gray-900 p-3 rounded flex items-center justify-between">
+            <code className="text-emerald-400 text-sm break-all">{fileHash}</code>
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(fileHash);
+                alert("Hash copied to clipboard!");
+              }}
+              className="ml-2 p-2 hover:bg-gray-800 rounded transition-colors duration-200"
+              title="Copy hash"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className="h-5 w-5 text-gray-400 hover:text-emerald-400"
+              >
+                <path d="M7 3h2v2H7V3zM4 9h2V7H4v2zm0 4h2v-2H4v2zm0 4h2v-2H4v2zm3 2h2v-2H7v2zM9 3h2v2H9V3zm4 0h2v2h-2V3zm4 0h2v2h-2V3zm-4 16h2v-2h-2v2zm4 0h2v-2h-2v2zM4 5h2V3H4v2zm16 0h-2V3h2v2zm0 4h-2V7h2v2zm0 4h-2v-2h2v2zm0 4h-2v-2h2v2zm0 4h-2v-2h2v2z" />
+              </svg>
+            </button>
+          </div>
+          {isVerifying ? (
+            <p className="text-yellow-400">Verifying hash...</p>
+          ) : hashExists ? (
+            <>
+              <p className="text-orange-400">This hash exists on the blockchain.</p>
+              <HashDetails hash={fileHash} />
+            </>
+          ) : (
+            <p className="text-emerald-400">Hash is unique and ready to be stored.</p>
+          )}
+        </div>
+  
+        {!hashExists && <div className="border-t border-gray-700 pt-4">{renderStorageButton()}</div>}
+      </div>
+    );
+  };
   return (
     <div className="w-full flex justify-center">
       <div className="w-4/6">
@@ -309,7 +369,7 @@ export default function FileUploadSection() {
         </button>
         {fileHash && file && (
           <div className="bg-gray-800 rounded-lg p-4 mb-4 space-y-4">
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <p className="text-white font-bold">File Hash (Keccak-256):</p>
               <div className="bg-gray-900 p-3 rounded flex items-center justify-between">
                 <code className="text-emerald-400 text-sm break-all">{fileHash}</code>
@@ -331,10 +391,10 @@ export default function FileUploadSection() {
                   </svg>
                 </button>
               </div>
-            </div>
+            </div> */}
 
             {/* Blockchain Storage Section */}
-            <div className="border-t border-gray-700 pt-4">{renderStorageButton()}</div>
+            <div className="border-t border-gray-700 pt-4">{renderHashSection()}</div>
           </div>
         )}
       </div>
